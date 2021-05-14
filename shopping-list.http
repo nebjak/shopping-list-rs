@@ -1,0 +1,11 @@
+GET http://{{server}}:{{port}}/api/v1/
+Accept: application/json
+
+###
+
+POST http://{{server}}:{{port}}/api/v1/shopping-lists/
+Content-Type: application/json
+
+{
+  "name": "{{shoppingListName}} {{$randomInt}}"
+}
