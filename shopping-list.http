@@ -9,3 +9,10 @@ Content-Type: application/json
 {
   "name": "{{shoppingListName}} {{$randomInt}}"
 }
+
+###
+
+GET http://{{server}}:{{port}}/api/v1/shopping-lists/
+Accept: application/json
+
+###

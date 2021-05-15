@@ -28,8 +28,15 @@ async fn add_shopping_list(
 
 #[get("/")]
 async fn get_shopping_lists(db_client: web::Data<DbConnection>) -> impl Responder {
-    let _ = &db_client.db;
-    HttpResponse::Ok().finish()
+    let shoppling_list_service = ShoppingListService::new(&db_client.db);
+
+    match shoppling_list_service.get_all().await {
+        Ok(result) => match result {
+            Some(lists) => HttpResponse::Ok().json(lists),
+            None => HttpResponse::NotFound().finish(),
+        },
+        Err(_) => HttpResponse::BadRequest().finish(),
+    }
 }
 
 #[get("/tmpdemo")]
