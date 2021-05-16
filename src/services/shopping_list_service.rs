@@ -1,10 +1,11 @@
 use futures::stream::StreamExt;
 use mongodb::{
     bson,
-    bson::{doc, Bson},
+    bson::{doc, oid::ObjectId, Bson},
     error::Result,
     Database,
 };
+use std::str::FromStr;
 
 use crate::models::shopping_list::ShoppingList;
 
@@ -22,7 +23,7 @@ impl ShoppingListService<'_> {
     pub async fn add(&self, mut shopping_list: ShoppingList) -> Result<ShoppingList> {
         let collection = self.db.collection(COLLECTION_NAME);
         match collection
-            .insert_one(bson::to_document(&shopping_list).unwrap(), None)
+            .insert_one(bson::to_document(&shopping_list)?, None)
             .await
         {
             Ok(result) => {
@@ -41,17 +42,28 @@ impl ShoppingListService<'_> {
 
     pub async fn get_all(&self) -> Result<Option<Vec<ShoppingList>>> {
         let collection = self.db.collection(COLLECTION_NAME);
-        let mut cursor = collection.find(doc! {}, None).await.unwrap();
+        let mut cursor = collection.find(doc! {}, None).await?;
 
         let mut result: Vec<ShoppingList> = Vec::new();
 
         while let Some(list) = cursor.next().await {
-            result.push(bson::from_document(list.unwrap()).unwrap());
+            result.push(bson::from_document(list?)?);
         }
 
         match result.len() {
             0 => Ok(None),
             _ => Ok(Some(result)),
+        }
+    }
+
+    pub async fn get_one(&self, id: String) -> Result<Option<ShoppingList>> {
+        let collection = self.db.collection(COLLECTION_NAME);
+
+        let oid = ObjectId::from_str(id.as_str()).unwrap_or_default();
+
+        match collection.find_one(doc! { "_id": oid }, None).await? {
+            Some(document) => Ok(Some(bson::from_document(document).unwrap())),
+            None => Ok(None),
         }
     }
 }
