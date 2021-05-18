@@ -3,7 +3,7 @@ Accept: application/json
 
 ###
 
-POST http://{{server}}:{{port}}/api/v1/shopping-lists/
+POST http://{{server}}:{{port}}/api/v1/shopping-lists
 Content-Type: application/json
 
 {
@@ -12,7 +12,7 @@ Content-Type: application/json
 
 ###
 
-GET http://{{server}}:{{port}}/api/v1/shopping-lists/
+GET http://{{server}}:{{port}}/api/v1/shopping-lists
 Accept: application/json
 
 ###

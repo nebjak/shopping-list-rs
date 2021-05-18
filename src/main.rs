@@ -14,7 +14,7 @@ async fn hello() -> impl Responder {
     HttpResponse::Ok().body("Hello world")
 }
 
-#[post("/")]
+#[post("")]
 async fn add_shopping_list(
     db_client: web::Data<DbConnection>,
     shopping_list: web::Json<ShoppingList>,
@@ -26,7 +26,7 @@ async fn add_shopping_list(
     }
 }
 
-#[get("/")]
+#[get("")]
 async fn get_shopping_lists(db_client: web::Data<DbConnection>) -> impl Responder {
     let shoppling_list_service = ShoppingListService::new(&db_client.db);
 
