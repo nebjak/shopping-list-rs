@@ -82,6 +82,27 @@ async fn add_list_item(
     }
 }
 
+#[get("/{shopping_list_id}/items")]
+async fn get_list_items(
+    db_client: web::Data<DbConnection>,
+    shopping_list_id: web::Path<String>,
+) -> impl Responder {
+    let shopping_list_id = match ObjectId::from_str(shopping_list_id.into_inner().as_str()) {
+        Ok(oid) => oid,
+        Err(_) => return HttpResponse::BadRequest().finish(),
+    };
+
+    let list_item_service = ListItemService::new(&db_client.db);
+
+    match list_item_service.get_all(shopping_list_id).await {
+        Ok(result) => match result {
+            Some(items) => HttpResponse::Ok().json(items),
+            None => HttpResponse::NotFound().finish(),
+        },
+        Err(_) => HttpResponse::BadRequest().finish(),
+    }
+}
+
 #[get("/tmpdemo")]
 async fn tmpdemo() -> impl Responder {
     HttpResponse::Ok().body("Hello")
@@ -110,6 +131,7 @@ async fn main() -> std::io::Result<()> {
                     .service(
                         web::scope("/shopping-lists")
                             .service(add_list_item)
+                            .service(get_list_items)
                             .service(add_shopping_list)
                             .service(get_one_shopping_list)
                             .service(get_shopping_lists),

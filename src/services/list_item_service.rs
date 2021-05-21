@@ -1,9 +1,10 @@
 use mongodb::bson::oid::ObjectId;
-use mongodb::bson::Bson;
+use mongodb::bson::{doc, Bson};
 use mongodb::error::Result;
 use mongodb::{bson, Collection, Database};
 
 use crate::models::shopping_list::{ItemStatus, ListItem};
+use futures::StreamExt;
 
 pub struct ListItemService<'a> {
     db: &'a Database,
@@ -42,6 +43,29 @@ impl ListItemService<'_> {
                 println!("{:?}", err);
                 Err(err)
             }
+        }
+    }
+
+    pub async fn get_all(&self, shopping_list_id: ObjectId) -> Result<Option<Vec<ListItem>>> {
+        let mut cursor = self
+            .collection
+            .find(
+                doc! {
+                    "shopping_list_id": shopping_list_id
+                },
+                None,
+            )
+            .await?;
+
+        let mut result: Vec<ListItem> = Vec::new();
+
+        while let Some(list_item) = cursor.next().await {
+            result.push(bson::from_document(list_item?)?);
+        }
+
+        match result.len() {
+            0 => Ok(None),
+            _ => Ok(Some(result)),
         }
     }
 }
