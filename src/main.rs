@@ -1,10 +1,12 @@
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
 use dotenv::dotenv;
 use dotenv_codegen::dotenv;
-use mongodb::{Client, Database};
+use mongodb::{bson::oid::ObjectId, Client, Database};
 
-use crate::models::shopping_list::ShoppingList;
+use crate::models::shopping_list::{ListItem, ShoppingList};
+use crate::services::list_item_service::ListItemService;
 use crate::services::shopping_list_service::ShoppingListService;
+use std::str::FromStr;
 
 mod models;
 mod services;
@@ -58,6 +60,28 @@ async fn get_one_shopping_list(
     }
 }
 
+#[post("/{shopping_list_id}/items")]
+async fn add_list_item(
+    db_client: web::Data<DbConnection>,
+    shopping_list_id: web::Path<String>,
+    list_item: web::Json<ListItem>,
+) -> impl Responder {
+    let list_item_service = ListItemService::new(&db_client.db);
+
+    let shopping_list_id = match ObjectId::from_str(shopping_list_id.into_inner().as_str()) {
+        Ok(oid) => oid,
+        Err(_) => return HttpResponse::BadRequest().finish(),
+    };
+
+    match list_item_service
+        .add(shopping_list_id, list_item.into_inner())
+        .await
+    {
+        Ok(list_item) => HttpResponse::Ok().json(list_item),
+        Err(_) => HttpResponse::BadRequest().finish(),
+    }
+}
+
 #[get("/tmpdemo")]
 async fn tmpdemo() -> impl Responder {
     HttpResponse::Ok().body("Hello")
@@ -85,6 +109,7 @@ async fn main() -> std::io::Result<()> {
                 web::scope("/api/v1")
                     .service(
                         web::scope("/shopping-lists")
+                            .service(add_list_item)
                             .service(add_shopping_list)
                             .service(get_one_shopping_list)
                             .service(get_shopping_lists),

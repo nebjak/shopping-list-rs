@@ -21,3 +21,18 @@ GET http://{{server}}:{{port}}/api/v1/shopping-lists/609edfa800be9b9000e94929
 Accept: application/json
 
 ###
+
+GET http://{{server}}:{{port}}/api/v1/shopping-lists/609edfa800be9b9000e94929/items
+Accept: application/json
+
+###
+
+POST http://{{server}}:{{port}}/api/v1/shopping-lists/609edfa800be9b9000e94929/items
+Content-Type: application/json
+
+{
+  "name": "Buy milk"
+}
+
+###
+

@@ -20,6 +20,6 @@ pub struct ListItem {
     #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
     pub id: Option<ObjectId>,
     pub name: String,
-    pub status: ItemStatus,
-    pub shopping_list_id: ObjectId,
+    pub status: Option<ItemStatus>,
+    pub shopping_list_id: Option<ObjectId>,
 }
