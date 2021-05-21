@@ -6,7 +6,7 @@ use mongodb::{bson::oid::ObjectId, Client, Database};
 use crate::models::shopping_list::{ListItem, ShoppingList};
 use crate::services::list_item_service::ListItemService;
 use crate::services::shopping_list_service::ShoppingListService;
-use crate::utils::responders::get_responder;
+use crate::utils::responders::{get_responder, post_responder};
 use std::str::FromStr;
 
 mod models;
@@ -24,10 +24,7 @@ async fn add_shopping_list(
     shopping_list: web::Json<ShoppingList>,
 ) -> impl Responder {
     let shopping_list_service = ShoppingListService::new(&db_client.db);
-    match shopping_list_service.add(shopping_list.into_inner()).await {
-        Ok(shopping_list) => HttpResponse::Ok().json(shopping_list),
-        Err(_) => HttpResponse::BadRequest().finish(),
-    }
+    post_responder(shopping_list_service.add(shopping_list.into_inner()).await)
 }
 
 #[get("")]
@@ -64,13 +61,11 @@ async fn add_list_item(
         Err(_) => return HttpResponse::BadRequest().finish(),
     };
 
-    match list_item_service
-        .add(shopping_list_id, list_item.into_inner())
-        .await
-    {
-        Ok(list_item) => HttpResponse::Ok().json(list_item),
-        Err(_) => HttpResponse::BadRequest().finish(),
-    }
+    post_responder(
+        list_item_service
+            .add(shopping_list_id, list_item.into_inner())
+            .await,
+    )
 }
 
 #[get("/{shopping_list_id}/items")]

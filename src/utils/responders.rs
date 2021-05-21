@@ -13,3 +13,10 @@ where
         Err(_) => HttpResponse::BadRequest().finish(),
     }
 }
+
+pub fn post_responder<T: Serialize>(input: Result<T>) -> HttpResponse {
+    match input {
+        Ok(list_item) => HttpResponse::Ok().json(list_item),
+        Err(_) => HttpResponse::BadRequest().finish(),
+    }
+}
