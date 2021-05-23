@@ -17,17 +17,17 @@ Accept: application/json
 
 ###
 
-GET http://{{server}}:{{port}}/api/v1/shopping-lists/609edfa800be9b9000e94929
+GET http://{{server}}:{{port}}/api/v1/shopping-lists/{{shoppingListId}}
 Accept: application/json
 
 ###
 
-GET http://{{server}}:{{port}}/api/v1/shopping-lists/609edfa800be9b9000e94929/items
+GET http://{{server}}:{{port}}/api/v1/shopping-lists/{{shoppingListId}}/items
 Accept: application/json
 
 ###
 
-POST http://{{server}}:{{port}}/api/v1/shopping-lists/609edfa800be9b9000e94929/items
+POST http://{{server}}:{{port}}/api/v1/shopping-lists/{{shoppingListId}}/items
 Content-Type: application/json
 
 {
@@ -36,3 +36,12 @@ Content-Type: application/json
 
 ###
 
+PUT http://{{server}}:{{port}}/api/v1/shopping-lists/{{shoppingListId}}/items/{{listItemId}}
+Content-Type: application/json
+
+{
+  "name": "Buy milk {{$randomInt}}",
+  "status": "DONE"
+}
+
+###
