@@ -5,6 +5,7 @@ use mongodb::{bson, Collection, Database};
 
 use crate::models::shopping_list::{ItemStatus, ListItem};
 use futures::StreamExt;
+use mongodb::results::UpdateResult;
 
 pub struct ListItemService<'a> {
     db: &'a Database,
@@ -67,5 +68,24 @@ impl ListItemService<'_> {
             0 => Ok(None),
             _ => Ok(Some(result)),
         }
+    }
+
+    pub async fn update(
+        &self,
+        list_item_id: ObjectId,
+        list_item: ListItem,
+    ) -> Result<UpdateResult> {
+        self.collection
+            .update_one(
+                doc! {"_id": list_item_id},
+                doc! {
+                    "$set": {
+                        "name": list_item.name,
+                        "status": list_item.status.unwrap().to_string()
+                    }
+                },
+                None,
+            )
+            .await
     }
 }
