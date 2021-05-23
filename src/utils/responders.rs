@@ -1,5 +1,6 @@
 use actix_web::HttpResponse;
 use mongodb::error::Result;
+use mongodb::results::UpdateResult;
 use serde::Serialize;
 
 pub fn get_responder<T: Serialize>(input: Result<Option<T>>) -> HttpResponse
@@ -17,6 +18,13 @@ where
 pub fn post_responder<T: Serialize>(input: Result<T>) -> HttpResponse {
     match input {
         Ok(list_item) => HttpResponse::Ok().json(list_item),
+        Err(_) => HttpResponse::BadRequest().finish(),
+    }
+}
+
+pub fn put_responder(input: Result<UpdateResult>) -> HttpResponse {
+    match input {
+        Ok(result) => HttpResponse::Ok().json(result),
         Err(_) => HttpResponse::BadRequest().finish(),
     }
 }
