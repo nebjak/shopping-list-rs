@@ -104,11 +104,6 @@ async fn update_list_item(
     )
 }
 
-#[get("/tmpdemo")]
-async fn tmpdemo() -> impl Responder {
-    HttpResponse::Ok().body("Hello")
-}
-
 struct DbConnection {
     db: Database,
 }
@@ -117,10 +112,19 @@ struct DbConnection {
 async fn main() -> std::io::Result<()> {
     dotenv().ok();
 
+    const SERVER_URL: &str = dotenv!("SERVER_URL");
+    const SERVER_PORT: &str = dotenv!("SERVER_PORT");
     const DATABASE_URL: &str = dotenv!("DATABASE_URL");
     const DATABASE_NAME: &str = dotenv!("DATABASE_NAME");
 
-    let client = Client::with_uri_str(DATABASE_URL).await.unwrap();
+    let client = Client::with_uri_str(DATABASE_URL)
+        .await
+        .expect("⛔️ DB connection filed!");
+
+    println!(
+        "👌 Server is running on http://{}:{}/api/v1/",
+        SERVER_URL, SERVER_PORT
+    );
 
     HttpServer::new(move || {
         App::new()
@@ -138,11 +142,10 @@ async fn main() -> std::io::Result<()> {
                             .service(get_one_shopping_list)
                             .service(get_shopping_lists),
                     )
-                    .service(hello)
-                    .service(tmpdemo),
+                    .service(hello),
             )
     })
-    .bind("127.0.0.1:8080")?
+    .bind(format!("{}:{}", SERVER_URL, SERVER_PORT))?
     .run()
     .await
 }
