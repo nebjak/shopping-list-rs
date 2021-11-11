@@ -1,4 +1,4 @@
-use actix_web::{get, post, put, web, App, HttpResponse, HttpServer, Responder};
+use actix_web::{delete, get, post, put, web, App, HttpResponse, HttpServer, Responder};
 use dotenv::dotenv;
 use dotenv_codegen::dotenv;
 use mongodb::{bson::oid::ObjectId, Client, Database};
@@ -6,7 +6,7 @@ use mongodb::{bson::oid::ObjectId, Client, Database};
 use crate::models::shopping_list::{ListItem, ShoppingList};
 use crate::services::list_item_service::ListItemService;
 use crate::services::shopping_list_service::ShoppingListService;
-use crate::utils::responders::{get_responder, post_responder, put_responder};
+use crate::utils::responders::{delete_responder, get_responder, post_responder, put_responder};
 use std::str::FromStr;
 
 mod models;
@@ -104,6 +104,21 @@ async fn update_list_item(
     )
 }
 
+#[delete("/{shopping_list_id}/items/{list_item_id}")]
+async fn delete_list_item(
+    db_client: web::Data<DbConnection>,
+    path: web::Path<(String, String)>,
+) -> impl Responder {
+    let list_item_service = ListItemService::new(&db_client.db);
+
+    let list_item_id = match ObjectId::from_str(path.into_inner().1.as_str()) {
+        Ok(oid) => oid,
+        Err(_) => return HttpResponse::BadRequest().finish(),
+    };
+
+    delete_responder(list_item_service.delete(list_item_id).await)
+}
+
 struct DbConnection {
     db: Database,
 }
@@ -135,6 +150,7 @@ async fn main() -> std::io::Result<()> {
                 web::scope("/api/v1")
                     .service(
                         web::scope("/shopping-lists")
+                            .service(delete_list_item)
                             .service(update_list_item)
                             .service(add_list_item)
                             .service(get_list_items)

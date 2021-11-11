@@ -45,3 +45,8 @@ Content-Type: application/json
 }
 
 ###
+
+DELETE http://{{server}}:{{port}}/api/v1/shopping-lists/{{shoppingListId}}/items/{{listItemId}}
+Content-Type: application/json
+
+###
