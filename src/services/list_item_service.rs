@@ -5,7 +5,7 @@ use mongodb::{bson, Collection, Database};
 
 use crate::models::shopping_list::{ItemStatus, ListItem};
 use futures::StreamExt;
-use mongodb::results::UpdateResult;
+use mongodb::results::{DeleteResult, UpdateResult};
 
 pub struct ListItemService<'a> {
     db: &'a Database,
@@ -86,6 +86,12 @@ impl ListItemService<'_> {
                 },
                 None,
             )
+            .await
+    }
+
+    pub async fn delete(&self, list_item_id: ObjectId) -> Result<DeleteResult> {
+        self.collection
+            .delete_one(doc! {"_id": list_item_id}, None)
             .await
     }
 }
