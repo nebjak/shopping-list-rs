@@ -1,6 +1,6 @@
 use actix_web::HttpResponse;
 use mongodb::error::Result;
-use mongodb::results::UpdateResult;
+use mongodb::results::{DeleteResult, UpdateResult};
 use serde::Serialize;
 
 pub fn get_responder<T: Serialize>(input: Result<Option<T>>) -> HttpResponse
@@ -26,5 +26,12 @@ pub fn put_responder(input: Result<UpdateResult>) -> HttpResponse {
     match input {
         Ok(result) => HttpResponse::Ok().json(result),
         Err(_) => HttpResponse::BadRequest().finish(),
+    }
+}
+
+pub fn delete_responder(input: Result<DeleteResult>) -> HttpResponse {
+    match input {
+        Ok(result) => HttpResponse::Ok().json(result),
+        Err(_) => HttpResponse::NotFound().finish(),
     }
 }
